@@ -12,6 +12,9 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Generate unique message ID
+    const messageId = `member-request-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -19,9 +22,9 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'onboarding@resend.dev',
+        from: 'Higher Ed Med <onboarding@resend.dev>',
         to: [process.env.TO_EMAIL],
-        subject: 'Higher Ed Med Member Request',
+        subject: `New Service Request - ${fullName}`,
         text: `New member request received:
 
 Patient Name: ${fullName}
@@ -31,13 +34,17 @@ Phone: ${phone}
 Services Requested: ${services}
 
 ---
-This email was sent from the Higher Ed Med mobile app.`
+Request ID: ${messageId}
+Timestamp: ${new Date().toISOString()}`,
+        headers: {
+          'Message-ID': `<${messageId}@resend.dev>`,
+          'X-Priority': '1',
+          'X-MSMail-Priority': 'High'
+        }
       }),
     });
 
     if (response.ok) {
-      const result = await response.json();
-      console.log('Email sent successfully:', result);
       res.status(200).json({ success: true, message: 'Email sent successfully' });
     } else {
       const errorText = await response.text();
