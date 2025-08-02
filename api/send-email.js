@@ -12,8 +12,14 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Generate unique message ID
-    const messageId = `member-request-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    // Generate truly unique identifiers
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substr(2, 12);
+    const memberIdHash = memberId.replace(/[^a-zA-Z0-9]/g, ''); // Clean member ID
+    const messageId = `member-request-${timestamp}-${memberIdHash}-${randomString}`;
+    
+    // Create unique subject line to prevent threading
+    const uniqueSubject = `New Service Request - ${fullName} [${timestamp}]`;
     
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -22,9 +28,9 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'Higher Ed Med <onboarding@resend.dev>',
+        from: 'HEM Patient Request<onboarding@resend.dev>',
         to: [process.env.TO_EMAIL],
-        subject: `New Service Request - ${fullName}`,
+        subject: uniqueSubject,
         text: `New member request received:
 
 Patient Name: ${fullName}
@@ -37,9 +43,16 @@ Services Requested: ${services}
 Request ID: ${messageId}
 Timestamp: ${new Date().toISOString()}`,
         headers: {
-          'Message-ID': `<${messageId}@resend.dev>`,
+          // Unique Message-ID for each email
+          'Message-ID': `<${messageId}@yourdomain.com>`,
+          // Explicitly break threading by not including References or In-Reply-To
           'X-Priority': '1',
-          'X-MSMail-Priority': 'High'
+          'X-MSMail-Priority': 'High',
+          // Additional headers to ensure uniqueness
+          'X-Unique-ID': messageId,
+          'X-Request-Type': 'member-service-request',
+          // Thread-Index with unique value (helps with Outlook)
+          'Thread-Index': Buffer.from(`${messageId}-${timestamp}`).toString('base64')
         }
       }),
     });
