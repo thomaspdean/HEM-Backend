@@ -1,44 +1,47 @@
 import fetch from 'node-fetch';
 
 export default async function handler(req, res) {
-  // Only allow POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
   const { fullName, memberId, email, phone, services } = req.body;
 
-  // Validate required fields
   if (!fullName || !memberId || !email || !phone || !services) {
     return res.status(400).json({ message: 'Missing required fields' });
   }
 
   try {
-    // Call EmailJS from server-side
-    const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+    const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
+        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        service_id: process.env.EMAILJS_SERVICE_ID,
-        template_id: process.env.EMAILJS_TEMPLATE_ID,
-        user_id: process.env.EMAILJS_USER_ID,
-        template_params: {
-          fullName,
-          memberId,
-          email,
-          phone,
-          services
-        },
+        from: 'onboarding@resend.dev',
+        to: [process.env.TO_EMAIL],
+        subject: 'Higher Ed Med Member Request',
+        text: `New member request received:
+
+Patient Name: ${fullName}
+Member ID: ${memberId}
+Email: ${email}
+Phone: ${phone}
+Services Requested: ${services}
+
+---
+This email was sent from the Higher Ed Med mobile app.`
       }),
     });
 
     if (response.ok) {
+      const result = await response.json();
+      console.log('Email sent successfully:', result);
       res.status(200).json({ success: true, message: 'Email sent successfully' });
     } else {
       const errorText = await response.text();
-      console.error('EmailJS Error:', response.status, errorText);
+      console.error('Resend Error:', response.status, errorText);
       res.status(500).json({ message: 'Failed to send email' });
     }
   } catch (error) {
