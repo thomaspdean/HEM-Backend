@@ -1,9 +1,9 @@
 # Email API
 
 Backend API for sending emails from the Higher Ed Med mobile app.
+All pushes to this repo automatically deploy a new version to vercel.
 
 ## Environment Variables
 
-- `EMAILJS_SERVICE_ID`: Your EmailJS service ID
-- `EMAILJS_TEMPLATE_ID`: Your EmailJS template ID
-- `EMAILJS_USER_ID`: Your EmailJS user ID
+- `TO_EMAIL`: Email to send requests to
+- `RESEND_API_KEY`: Resend email API key
