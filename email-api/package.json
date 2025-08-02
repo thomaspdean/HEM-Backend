@@ -1,0 +1,9 @@
+{
+    "name": "email-api",
+    "version": "1.0.0",
+    "description": "Email API for Higher Ed Med app",
+    "main": "index.js",
+    "dependencies": {
+        "node-fetch": "^2.6.1"
+    }
+}
