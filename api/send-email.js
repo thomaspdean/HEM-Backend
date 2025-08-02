@@ -28,7 +28,7 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'HEM Patient Request<onboarding@resend.dev>',
+        from: 'HEM Patient Request<thomaspdean18@gmail.com>',
         to: [process.env.TO_EMAIL],
         subject: uniqueSubject,
         text: `New member request received:
