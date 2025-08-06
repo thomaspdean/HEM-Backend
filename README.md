@@ -7,3 +7,7 @@ All pushes to this repo automatically deploy a new version to vercel
 
 - `TO_EMAIL`: Email to send requests to: The HEM email
 - `RESEND_API_KEY`: Resend email API key: Held in HEM email account in resend
+
+## Versions:
+
+1.1.0: Updated Env vars for correct email
