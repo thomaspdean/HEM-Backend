@@ -5,7 +5,14 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
-  const { fullName, memberId, email, phone, services } = req.body;
+  const { fullName, memberId, email, phone, services, visitType } = req.body;
+
+  // visitType is optional: app versions before 1.2.0 don't send it.
+  const visitTypeLabels = { telehealth: 'Telehealth', 'in-person': 'In person' };
+  const visitPreference =
+    typeof visitType === 'string' && Object.hasOwn(visitTypeLabels, visitType)
+      ? visitTypeLabels[visitType]
+      : 'Not specified';
 
   if (!fullName || !memberId || !email || !phone || !services) {
     return res.status(400).json({ message: 'Missing required fields' });
@@ -37,6 +44,7 @@ Patient Name: ${fullName}
 Member ID: ${memberId}
 Email: ${email}
 Phone: ${phone}
+Visit Preference: ${visitPreference}
 Services Requested: ${services}
 
 ---
